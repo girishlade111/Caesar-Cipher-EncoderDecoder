@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cipher Encoder/Decoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div class="container mx-auto p-4 max-w-2xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-white">Caesar Cipher Encoder/Decoder</h1>
+            <div class="flex justify-center mt-4">
+                <button id="theme-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg transition-colors">
+                    Toggle Dark Mode
+                </button>
+            </div>
+        </header>
+        <main>
+            <div class="mb-4">
+                <label for="input-text" class="block text-gray-700 dark:text-gray-300">Enter Text:</label>
+                <textarea id="input-text" class="w-full p-2 mt-1 border rounded-lg resize-none dark:bg-gray-800 dark:border-gray-700 dark:text-white" rows="4"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="shift" class="block text-gray-700 dark:text-gray-300">Shift Value (1-25):</label>
+                <input type="number" id="shift" min="1" max="25" value="3" class="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+            </div>
+            <div class="mb-4 flex justify-between space-x-4">
+                <button id="encrypt-btn" class="w-1/2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Encrypt</button>
+                <button id="decrypt-btn" class="w-1/2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">Decrypt</button>
+            </div>
+            <div class="mb-4">
+                <label for="output-text" class="block text-gray-700 dark:text-gray-300">Result:</label>
+                <textarea id="output-text" class="w-full p-2 mt-1 border rounded-lg resize-none bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-white" rows="4" readonly></textarea>
+            </div>
+            <div class="flex justify-between space-x-4">
+                <button id="copy-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">Copy to Clipboard</button>
+                <button id="clear-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Clear All</button>
+            </div>
+        </main>
+    </div>
+    <script>
+        let currentMode = null;
+
+        function caesarCipher(text, shift) {
+            return text.replace(/[a-zA-Z]/g, (char) => {
+                const code = char.charCodeAt(0);
+                const offset = code >= 97 ? 97 : 65;
+                const shifted = ((code - offset + shift) % 26 + 26) % 26 + offset;
+                return String.fromCharCode(shifted);
+            });
+        }
+
+        function processText() {
+            const input = document.getElementById('input-text').value;
+            const shift = parseInt(document.getElementById('shift').value) || 0;
+            let result = '';
+
+            if (currentMode === 'encrypt') {
+                result = caesarCipher(input, shift);
+            } else if (currentMode === 'decrypt') {
+                result = caesarCipher(input, -shift);
+            }
+
+            document.getElementById('output-text').value = result;
+        }
+
+        document.getElementById('encrypt-btn').addEventListener('click', () => {
+            currentMode = 'encrypt';
+            processText();
+        });
+
+        document.getElementById('decrypt-btn').addEventListener('click', () => {
+            currentMode = 'decrypt';
+            processText();
+        });
+
+        document.getElementById('input-text').addEventListener('input', () => {
+            if (currentMode) processText();
+        });
+
+        document.getElementById('shift').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            if (value < 1) e.target.value = 1;
+            if (value > 25) e.target.value = 25;
+            if (currentMode) processText();
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const output = document.getElementById('output-text');
+            output.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            document.getElementById('input-text').value = '';
+            document.getElementById('output-text').value = '';
+            document.getElementById('shift').value = 3;
+            currentMode = null;
+        });
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+        });
+    </script>
+</body>
+</html>
